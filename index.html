@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Planner</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Planner">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#123524">
+<style>
+:root{--bg:#123524;--card:#1E293B;--text:#F8FAFC;--accent:#67E8F9;--muted:#9fb8a9}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;padding:calc(env(safe-area-inset-top,0px) + 24px) 20px calc(env(safe-area-inset-bottom,0px) + 32px)}
+main{max-width:560px;margin:0 auto}
+h1{font-size:1.9rem;margin:0 0 4px}
+.sub{margin:0 0 24px;color:var(--muted)}
+.metric{background:var(--card);border-radius:12px;padding:20px}
+.metric .label{font-size:.9rem;color:var(--muted)}
+.metric .value{font-size:3rem;font-weight:700;color:var(--accent);line-height:1.1}
+.start{margin:12px 0 0}
+hr{border:0;border-top:1px solid rgba(248,250,252,.2);margin:28px 0}
+h2{font-size:1.3rem;margin:0 0 12px}
+select{width:100%;font-size:1rem;padding:14px;border-radius:10px;border:1px solid rgba(248,250,252,.25);
+  background:var(--card);color:var(--text);margin-bottom:24px}
+h3{font-size:1.05rem;margin:0 0 10px}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;gap:14px;padding:12px 14px;border-radius:10px;margin-bottom:6px;border-left:4px solid transparent}
+li .t{font-weight:700;min-width:108px;font-variant-numeric:tabular-nums}
+li.now{background:var(--card);border-left-color:var(--accent)}
+li.done{opacity:.45}
+.cap{color:var(--muted);font-size:.85rem;text-align:center;margin-top:28px}
+@media (prefers-color-scheme:light){:root{--bg:#123524}}
+</style>
+</head>
+<body>
+<main>
+  <h1>🎯 My Planner</h1>
+  <p class="sub">Prepare, one day at a time.</p>
+
+  <div class="metric">
+    <div class="label">Days until Project</div>
+    <div class="value" id="days">–</div>
+  </div>
+  <p class="start"><strong>Project starts:</strong> 8 February 2027</p>
+
+  <hr>
+  <h2>Choose your work shift</h2>
+  <select id="shift" aria-label="Which shift are you working?"></select>
+
+  <h3>Your daily plan</h3>
+  <ul id="plan"></ul>
+
+  <p class="cap">Small steps every day. Build your skills.</p>
+</main>
+
+<script>
+const START = new Date(2027, 1, 8); // 8 Feb 2027 (month is 0-based)
+
+const SCHEDULES = {
+  "Early shift (06:30–13:30)": [
+    ["05:15–06:15","Commute to work"],
+    ["06:30–13:30","Work"],
+    ["13:30–14:30","Commute home"],
+    ["15:00–16:00","Learn one C concept"],
+    ["16:15–17:15","Code from memory"],
+    ["17:15–18:15","Gym"],
+    ["19:00–19:45","Timed exercise and review"]
+  ],
+  "Midshift (09:00–17:00)": [
+    ["07:30–08:00","Review C"],
+    ["08:00–09:00","Commute to work"],
+    ["09:00–17:00","Work"],
+    ["17:00–18:00","Commute home"],
+    ["18:30–19:30","Gym"],
+    ["20:00–21:00","C programming practice"]
+  ],
+  "Late shift (14:00–22:00)": [
+    ["08:00–09:00","Learn one C concept"],
+    ["09:15–10:45","Independent coding exercises"],
+    ["11:00–12:00","Gym"],
+    ["13:00–14:00","Commute to work"],
+    ["14:00–22:00","Work"],
+    ["22:00–23:00","Commute home"]
+  ]
+};
+
+const sel = document.getElementById("shift");
+const plan = document.getElementById("plan");
+const daysEl = document.getElementById("days");
+
+Object.keys(SCHEDULES).forEach(name => {
+  const o = document.createElement("option");
+  o.value = o.textContent = name;
+  sel.appendChild(o);
+});
+
+try {
+  const saved = localStorage.getItem("shift");
+  if (saved && SCHEDULES[saved]) sel.value = saved;
+} catch (e) {}
+
+function mins(hhmm){ const [h,m] = hhmm.split(":").map(Number); return h*60+m; }
+
+function renderDays(){
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diff = Math.round((START - today) / 86400000);
+  daysEl.textContent = diff > 0 ? diff : (diff === 0 ? "Today!" : "Started");
+}
+
+function renderPlan(){
+  const now = new Date();
+  const cur = now.getHours()*60 + now.getMinutes();
+  plan.innerHTML = "";
+  SCHEDULES[sel.value].forEach(([time, task]) => {
+    const [a, b] = time.split("–").map(mins);
+    const li = document.createElement("li");
+    if (cur >= a && cur < b) li.className = "now";
+    else if (cur >= b) li.className = "done";
+    const t = document.createElement("span"); t.className = "t"; t.textContent = time;
+    const k = document.createElement("span"); k.textContent = task;
+    li.append(t, k);
+    plan.appendChild(li);
+  });
+}
+
+sel.addEventListener("change", () => {
+  try { localStorage.setItem("shift", sel.value); } catch (e) {}
+  renderPlan();
+});
+
+function refresh(){ renderDays(); renderPlan(); }
+refresh();
+setInterval(refresh, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
