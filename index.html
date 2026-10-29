@@ -1,6 +1,6 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,301 +12,999 @@
   <meta name="apple-mobile-web-app-title" content="Planner">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#123524">
+
   <style>
     :root {
       --bg: #123524;
       --card: #1E293B;
       --text: #F8FAFC;
       --accent: #67E8F9;
-      --muted: #9fb8a9
+      --muted: #9fb8a9;
+      --border: rgba(248, 250, 252, .2);
     }
 
-    * {
-      box-sizing: border-box
-    }
+    * { box-sizing: border-box; }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
     }
 
     body {
       min-height: 100vh;
-      padding: calc(env(safe-area-inset-top, 0px) + 24px) 20px calc(env(safe-area-inset-bottom, 0px) + 32px)
+      padding: calc(env(safe-area-inset-top, 0px) + 24px)
+        20px calc(env(safe-area-inset-bottom, 0px) + 32px);
     }
 
-    main {
-      max-width: 560px;
-      margin: 0 auto
-    }
-
-    h1 {
-      font-size: 1.9rem;
-      margin: 0 0 4px
-    }
-
-    .sub {
-      margin: 0 0 24px;
-      color: var(--muted)
-    }
+    main { max-width: 560px; margin: 0 auto; }
+    h1 { font-size: 1.9rem; margin: 0 0 4px; }
+    h2 { font-size: 1.3rem; margin: 0 0 12px; }
+    h3 { font-size: 1.05rem; margin: 0 0 10px; }
+    .sub { margin: 0 0 24px; color: var(--muted); }
 
     .metric {
       background: var(--card);
       border-radius: 12px;
-      padding: 20px
+      padding: 20px;
     }
 
-    .metric .label {
-      font-size: .9rem;
-      color: var(--muted)
-    }
+    .metric .label { font-size: .9rem; color: var(--muted); }
 
     .metric .value {
       font-size: 3rem;
       font-weight: 700;
       color: var(--accent);
-      line-height: 1.1
+      line-height: 1.1;
     }
 
-    .start {
-      margin: 12px 0 0
-    }
+    .start { margin: 12px 0 0; }
 
     hr {
       border: 0;
-      border-top: 1px solid rgba(248, 250, 252, .2);
-      margin: 28px 0
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
     }
 
-    h2 {
-      font-size: 1.3rem;
-      margin: 0 0 12px
-    }
-
-    select {
+    select, input, textarea {
       width: 100%;
-      font-size: 1rem;
-      padding: 14px;
+      font: inherit;
+      padding: 12px;
       border-radius: 10px;
-      border: 1px solid rgba(248, 250, 252, .25);
+      border: 1px solid var(--border);
       background: var(--card);
       color: var(--text);
-      margin-bottom: 24px
     }
 
-    h3 {
-      font-size: 1.05rem;
-      margin: 0 0 10px
+    select, input, textarea { margin-bottom: 12px; }
+    textarea { resize: vertical; min-height: 75px; }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+
+    label {
+      display: block;
+      margin: 0 0 6px;
+      font-size: .9rem;
+      color: var(--muted);
     }
 
-    ul {
-      list-style: none;
+    .field { flex: 1; min-width: 0; }
+    .time-row { display: flex; gap: 12px; }
+
+    button {
+      font: inherit;
+      font-weight: 600;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 15px;
+      cursor: pointer;
+    }
+
+    button:focus-visible, input:focus-visible,
+    select:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .primary {
+      width: 100%;
+      color: #123524;
+      background: var(--accent);
+    }
+
+    .secondary { color: var(--text); background: #334155; }
+    .danger { color: #fecaca; background: #512b32; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .actions button, .task-actions button {
+      font-size: .85rem;
+      padding: 8px 10px;
+    }
+
+    .editor, .custom-item {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .editor { margin-bottom: 24px; }
+
+    .hint, .small {
+      font-size: .85rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .hint { margin: 0 0 16px; }
+
+    .date-nav {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .date-nav input { flex: 1; min-width: 0; }
+    .date-nav button { padding: 12px; margin-bottom: 12px; }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 6px 0 16px;
+    }
+
+    .weekday {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       margin: 0;
-      padding: 0
+      padding: 9px 5px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .85rem;
     }
+
+    .weekday input {
+      width: auto;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .conditional[hidden], [hidden] { display: none !important; }
+
+    ul { list-style: none; margin: 0; padding: 0; }
 
     li {
       display: flex;
-      gap: 14px;
-      padding: 12px 14px;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
       border-radius: 10px;
       margin-bottom: 6px;
-      border-left: 4px solid transparent
+      border-left: 4px solid transparent;
+      overflow-wrap: anywhere;
     }
 
     li .t {
       font-weight: 700;
       min-width: 108px;
-      font-variant-numeric: tabular-nums
+      font-variant-numeric: tabular-nums;
     }
 
     li.now {
       background: var(--card);
-      border-left-color: var(--accent)
+      border-left-color: var(--accent);
     }
 
-    li.done {
-      opacity: .45
+    li.done { opacity: .45; }
+    .task-content { flex: 1; min-width: 0; }
+    .task-name { font-weight: 600; }
+    .task-note { color: var(--muted); font-size: .85rem; margin-top: 5px; }
+    .task-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .custom-item { margin-top: 12px; }
+    .custom-item h3 { margin-bottom: 5px; }
+    .empty { color: var(--muted); font-size: .9rem; }
+
+    .type-label {
+      display: inline-block;
+      color: var(--accent);
+      font-size: .78rem;
+      margin: 3px 0 6px;
     }
 
     .cap {
       color: var(--muted);
       font-size: .85rem;
       text-align: center;
-      margin-top: 28px
+      margin-top: 28px;
     }
 
-    @media (prefers-color-scheme:light) {
-      :root {
-        --bg: #123524
-      }
+    @media (max-width: 380px) {
+      li { flex-wrap: wrap; }
+      li .t { min-width: 100%; }
+      .weekdays { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
   </style>
 </head>
 
 <body>
-  <main>
-    <h1>🎯 My Planner</h1>
-    <p class="sub">Prepare, one day at a time.</p>
-    <p class="sub" id="today-date"></p>
+<main>
+  <h1>🎯 My Planner</h1>
+  <p class="sub">Prepare, one day at a time.</p>
+  <p class="sub" id="today-date"></p>
 
-    <div class="metric">
-      <div class="label">Days until Project</div>
-      <div class="value" id="days">–</div>
+  <div class="metric">
+    <div class="label">Days until Piscine</div>
+    <div class="value" id="days">–</div>
+  </div>
+  <p class="start"><strong>Piscine starts:</strong> 8 February 2027</p>
+
+  <hr>
+
+  <h2>Choose your work shift</h2>
+  <select id="shift" aria-label="Which shift are you working?"></select>
+
+  <h2>📅 Plan for a date</h2>
+  <p class="hint">
+    Choose a date to view its schedule, including activities scheduled
+    for that date and matching weekly activities.
+  </p>
+
+  <div class="date-nav">
+    <button class="secondary" type="button" id="previous-day"
+      aria-label="Previous day">←</button>
+    <input type="date" id="plan-date" aria-label="Date to view">
+    <button class="secondary" type="button" id="next-day"
+      aria-label="Next day">→</button>
+  </div>
+  <button class="secondary" type="button" id="today-button">
+    Go to today
+  </button>
+
+  <h3 id="plan-heading">Your daily plan</h3>
+  <ul id="plan"></ul>
+
+  <hr>
+
+  <h2>✏️ Manage my schedule</h2>
+  <p class="hint">
+    Create one-time activities or weekly routines. Activities are
+    associated with your selected work shift.
+  </p>
+
+  <form class="editor" id="activity-form">
+    <h3 id="form-title">Add a custom activity</h3>
+
+    <label for="activity-name">Activity name</label>
+    <input id="activity-name" type="text"
+      placeholder="e.g. C practice, Shell, gym, rest"
+      maxlength="120" required>
+
+    <label for="activity-type">Activity type</label>
+    <select id="activity-type">
+      <option value="once">Specific date — one time</option>
+      <option value="weekly">Recurring — every week</option>
+    </select>
+
+    <div id="once-fields" class="conditional">
+      <label for="activity-date">Activity date</label>
+      <input id="activity-date" type="date">
     </div>
-    <p class="start"><strong>Project starts:</strong> 8 February 2027</p>
 
-    <hr>
-    <h2>Choose your work shift</h2>
-    <select id="shift" aria-label="Which shift are you working?"></select>
+    <div id="weekly-fields" class="conditional" hidden>
+      <label>Repeat on these days</label>
+      <div class="weekdays">
+        <label class="weekday"><input type="checkbox" name="weekday" value="1"> Mon</label>
+        <label class="weekday"><input type="checkbox" name="weekday" value="2"> Tue</label>
+        <label class="weekday"><input type="checkbox" name="weekday" value="3"> Wed</label>
+        <label class="weekday"><input type="checkbox" name="weekday" value="4"> Thu</label>
+        <label class="weekday"><input type="checkbox" name="weekday" value="5"> Fri</label>
+        <label class="weekday"><input type="checkbox" name="weekday" value="6"> Sat</label>
+        <label class="weekday"><input type="checkbox" name="weekday" value="0"> Sun</label>
+      </div>
+      <label for="repeat-until">Repeat until (optional)</label>
+      <input id="repeat-until" type="date">
+      <p class="small">Leave the end date empty to repeat indefinitely.</p>
+    </div>
 
-    <h3>Your daily plan</h3>
-    <ul id="plan"></ul>
+    <div class="time-row">
+      <div class="field">
+        <label for="activity-start">Start time</label>
+        <input id="activity-start" type="time" value="18:00" required>
+      </div>
+      <div class="field">
+        <label for="activity-end">End time</label>
+        <input id="activity-end" type="time" value="18:30" required>
+      </div>
+    </div>
 
-    <p class="cap">Small steps every day. Build your skills.</p>
-  </main>
+    <label for="activity-notes">Notes (optional)</label>
+    <textarea id="activity-notes"
+      placeholder="What do you want to accomplish?"
+      maxlength="500"></textarea>
 
-  <script>
-    const START = new Date(2027, 1, 8); // 8 Feb 2027 (month is 0-based)
-    const todayDateEl = document.getElementById("today-date");
+    <button class="primary" id="save-button" type="submit">
+      + Add activity
+    </button>
 
-function renderTodayDate() {
-  const today = new Date();
-  todayDateEl.textContent = today.toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  });
-}
+    <div class="actions" id="cancel-row" hidden>
+      <button class="secondary" type="button" id="cancel-edit">
+        Cancel editing
+      </button>
+    </div>
+  </form>
 
-    const SCHEDULES = {
-      "Early shift (06:30–13:30)": [
-        ["05:15–06:15", "Commute to work"],
-        ["06:30–13:30", "Work"],
-        ["13:30–14:30", "Commute home"],
-        ["15:00–16:00", "Learn one C concept"],
-        ["16:15–17:15", "Code from memory"],
-        ["17:15–18:15", "Gym"],
-        ["19:00–19:45", "Timed exercise and review"],
-        ["19:45–20:45", "Read"],
-        ["20:45–21:45", "Sleep"]
-      ],
-      "Midshift (09:00–17:00)": [
-        ["07:30–08:00", "Review C"],
-        ["08:00–09:00", "Commute to work"],
-        ["09:00–17:00", "Work"],
-        ["17:00–18:00", "Commute home"],
-        ["18:30–19:30", "Gym"],
-        ["20:00–21:00", "C programming practice"]
-      ],
-      "Late shift (14:00–22:00)": [
-        ["08:00–09:00", "Learn one C concept"],
-        ["09:15–10:45", "Independent coding exercises"],
-        ["11:00–12:00", "Gym"],
-        ["13:00–14:00", "Commute to work"],
-        ["14:00–22:00", "Work"],
-        ["22:00–23:00", "Commute home"]
-      ]
-    };
+  <h3>My saved activities for this shift</h3>
+  <p class="hint">
+    This list includes future, past, and recurring activities.
+    Choose Edit to change an activity.
+  </p>
+  <div id="custom-list"></div>
 
-    const sel = document.getElementById("shift");
-    const plan = document.getElementById("plan");
-    const daysEl = document.getElementById("days");
+  <p class="cap">Small steps every day. Build your skills.</p>
+</main>
 
-    Object.keys(SCHEDULES).forEach(name => {
-      const o = document.createElement("option");
-      o.value = o.textContent = name;
-      sel.appendChild(o);
-    });
+<script>
+  const START = new Date(2027, 1, 8);
+  const STORAGE_KEY = "plannerActivitiesV2";
 
+  const SCHEDULES = {
+    "Early shift (06:30–13:30)": [
+      ["05:15–06:15", "Commute to work"],
+      ["06:30–13:30", "Work"],
+      ["13:30–14:30", "Commute home"],
+      ["15:00–16:00", "Learn one C concept"],
+      ["16:15–17:15", "Code from memory"],
+      ["17:15–18:15", "Gym"],
+      ["19:00–19:45", "Timed exercise and review"],
+      ["19:45–20:45", "Read"],
+      ["20:45–21:45", "Sleep"]
+    ],
+    "Midshift (09:00–17:00)": [
+      ["07:30–08:00", "Review C"],
+      ["08:00–09:00", "Commute to work"],
+      ["09:00–17:00", "Work"],
+      ["17:00–18:00", "Commute home"],
+      ["18:30–19:30", "Gym"],
+      ["20:00–21:00", "C programming practice"]
+    ],
+    "Late shift (14:00–22:00)": [
+      ["08:00–09:00", "Learn one C concept"],
+      ["09:15–10:45", "Independent coding exercises"],
+      ["11:00–12:00", "Gym"],
+      ["13:00–14:00", "Commute to work"],
+      ["14:00–22:00", "Work"],
+      ["22:00–23:00", "Commute home"]
+    ]
+  };
+
+  const $ = id => document.getElementById(id);
+
+  const sel = $("shift");
+  const plan = $("plan");
+  const daysEl = $("days");
+  const form = $("activity-form");
+  const nameInput = $("activity-name");
+  const typeInput = $("activity-type");
+  const dateInput = $("activity-date");
+  const untilInput = $("repeat-until");
+  const startInput = $("activity-start");
+  const endInput = $("activity-end");
+  const notesInput = $("activity-notes");
+  const customList = $("custom-list");
+  const formTitle = $("form-title");
+  const saveButton = $("save-button");
+  const cancelRow = $("cancel-row");
+  const planDateInput = $("plan-date");
+
+  let editingId = null;
+  let activities = [];
+  let storageAvailable = true;
+
+  function localDateString(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function todayString() {
+    return localDateString(new Date());
+  }
+
+  function parseDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return null;
+    const [y, m, d] = value.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    return localDateString(date) === value ? date : null;
+  }
+
+  function dateFromString(value) {
+    return parseDate(value);
+  }
+
+  function addDays(value, amount) {
+    const date = parseDate(value);
+    if (!date) return value;
+    date.setDate(date.getDate() + amount);
+    return localDateString(date);
+  }
+
+  function minutes(time) {
+    const parts = time.split(":").map(Number);
+    return parts[0] * 60 + parts[1];
+  }
+
+  function validTime(time) {
+    return /^([01]\d|2[0-3]):[0-5]\d$/.test(time || "");
+  }
+
+  // Migrate custom activities from the earlier version if present.
+  function loadActivities() {
     try {
-      const saved = localStorage.getItem("shift");
-      if (saved && SCHEDULES[saved]) sel.value = saved;
-    } catch (e) { }
-
-    function mins(hhmm) { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; }
-
-    function renderDays() {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const diff = Math.round((START - today) / 86400000);
-      daysEl.textContent = diff > 0 ? diff : (diff === 0 ? "Today!" : "Started");
-    }
-
-    function renderPlan() {
-      const now = new Date();
-      const cur = now.getHours() * 60 + now.getMinutes();
-      plan.innerHTML = "";
-      SCHEDULES[sel.value].forEach(([time, task]) => {
-        const [a, b] = time.split("–").map(mins);
-        const li = document.createElement("li");
-        if (cur >= a && cur < b) li.className = "now";
-        else if (cur >= b) li.className = "done";
-        const t = document.createElement("span"); t.className = "t"; t.textContent = time;
-        const k = document.createElement("span"); k.textContent = task;
-        li.append(t, k);
-        plan.appendChild(li);
-      });
-    }
-
-    sel.addEventListener("change", () => {
-      try { localStorage.setItem("shift", sel.value); } catch (e) { }
-      renderPlan();
-    });
-
-    function refresh() {renderTodayDate();renderDays();renderPlan();
-}
-    refresh();
-    setInterval(refresh, 60000);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
-
-    if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      const registration = await navigator.serviceWorker.register("./sw.js");
-
-      if (registration.waiting) {
-        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+      const current = localStorage.getItem(STORAGE_KEY);
+      if (current !== null) {
+        const parsed = JSON.parse(current);
+        if (Array.isArray(parsed)) activities = parsed;
+        return;
       }
 
-      registration.addEventListener("updatefound", () => {
-        const newWorker = registration.installing;
-        if (!newWorker) return;
+      const old = localStorage.getItem("customSchedules");
+      if (!old) return;
 
-        newWorker.addEventListener("statechange", () => {
-          if (
-            newWorker.state === "installed" &&
-            navigator.serviceWorker.controller
-          ) {
-            newWorker.postMessage({ type: "SKIP_WAITING" });
-          }
+      const parsedOld = JSON.parse(old);
+      if (!parsedOld || typeof parsedOld !== "object") return;
+
+      Object.entries(parsedOld).forEach(([shift, list]) => {
+        if (!Array.isArray(list)) return;
+
+        list.forEach(item => {
+          if (!item || !item.name || !item.start || !item.end) return;
+
+          // Older custom activities appeared every day, so preserve that
+          // behavior by migrating them to all seven weekdays.
+          activities.push({
+            id: item.id || makeId(),
+            shift,
+            name: item.name,
+            type: "weekly",
+            days: [0, 1, 2, 3, 4, 5, 6],
+            start: item.start,
+            end: item.end,
+            notes: item.notes || "",
+            until: ""
+          });
         });
       });
 
-      await registration.update();
-
-      document.addEventListener("visibilitychange", async () => {
-        if (!document.hidden) {
-          await registration.update();
-        }
-      });
-
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (refreshing) return;
-        refreshing = true;
-        window.location.reload();
-      });
+      if (activities.length) saveActivities();
     } catch (error) {
-      console.error("Service worker update check failed:", error);
+      console.warn("Could not load planner activities.", error);
     }
-  });
-}
-  </script>
-</body>
+  }
 
+  function saveActivities() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+      storageAvailable = true;
+      return true;
+    } catch (error) {
+      storageAvailable = false;
+      alert("Your changes could not be saved. Check browser storage settings.");
+      return false;
+    }
+  }
+
+  function makeId() {
+    return window.crypto && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
+  function getShiftActivities() {
+    return activities.filter(item => item.shift === sel.value);
+  }
+
+  function isScheduled(item, dateString) {
+    const date = parseDate(dateString);
+    if (!date) return false;
+
+    if (item.type === "once") {
+      return item.date === dateString;
+    }
+
+    if (item.type === "weekly") {
+      if (!Array.isArray(item.days) || !item.days.includes(date.getDay())) {
+        return false;
+      }
+
+      if (item.until && dateString > item.until) return false;
+      return true;
+    }
+
+    return false;
+  }
+
+  function renderTodayDate() {
+    $("today-date").textContent = new Date().toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  function renderDays() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diff = Math.round((START - today) / 86400000);
+    daysEl.textContent = diff > 0 ? diff : (diff === 0 ? "Today!" : "Started");
+  }
+
+  function makeButton(text, className, handler) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = className;
+    button.textContent = text;
+    button.addEventListener("click", handler);
+    return button;
+  }
+
+  function formatType(item) {
+    if (item.type === "once") return `One-time · ${item.date}`;
+    const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const days = (item.days || []).slice().sort((a, b) => {
+      const order = [1, 2, 3, 4, 5, 6, 0];
+      return order.indexOf(a) - order.indexOf(b);
+    }).map(day => names[day]).join(", ");
+    return `Weekly · ${days || "No days selected"}${item.until ? ` · Until ${item.until}` : ""}`;
+  }
+
+  function renderPlan() {
+    const selectedDate = planDateInput.value || todayString();
+    const selectedIsToday = selectedDate === todayString();
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const date = parseDate(selectedDate);
+    if (!date) return;
+
+    $("plan-heading").textContent = date.toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }) + " — Daily plan";
+
+    plan.replaceChildren();
+
+    const items = SCHEDULES[sel.value].map(item => ({
+      start: item[0].split("–")[0],
+      end: item[0].split("–")[1],
+      task: item[1],
+      custom: false
+    }));
+
+    getShiftActivities().filter(item => isScheduled(item, selectedDate))
+      .forEach(item => {
+        items.push({
+          start: item.start,
+          end: item.end,
+          task: item.name,
+          notes: item.notes,
+          custom: true,
+          id: item.id,
+          schedule: formatType(item)
+        });
+      });
+
+    items.sort((a, b) => minutes(a.start) - minutes(b.start));
+
+    if (!items.length) {
+      const empty = document.createElement("li");
+      empty.className = "empty";
+      empty.textContent = "No activities scheduled for this date.";
+      plan.appendChild(empty);
+      return;
+    }
+
+    items.forEach(item => {
+      const li = document.createElement("li");
+      const start = minutes(item.start);
+      const end = minutes(item.end);
+
+      if (selectedIsToday && currentMinutes >= start && currentMinutes < end) {
+        li.classList.add("now");
+      } else if (selectedIsToday && currentMinutes >= end) {
+        li.classList.add("done");
+      }
+
+      const time = document.createElement("span");
+      time.className = "t";
+      time.textContent = `${item.start}–${item.end}`;
+
+      const content = document.createElement("div");
+      content.className = "task-content";
+
+      const task = document.createElement("div");
+      task.className = "task-name";
+      task.textContent = item.task;
+      content.appendChild(task);
+
+      if (item.custom && item.schedule) {
+        const type = document.createElement("div");
+        type.className = "type-label";
+        type.textContent = item.schedule;
+        content.appendChild(type);
+      }
+
+      if (item.notes) {
+        const note = document.createElement("div");
+        note.className = "task-note";
+        note.textContent = item.notes;
+        content.appendChild(note);
+      }
+
+      if (item.custom) {
+        const actions = document.createElement("div");
+        actions.className = "task-actions";
+        actions.appendChild(makeButton("Edit", "secondary",
+          () => editActivity(item.id)));
+        actions.appendChild(makeButton("Delete", "danger",
+          () => deleteActivity(item.id)));
+        content.appendChild(actions);
+      }
+
+      li.append(time, content);
+      plan.appendChild(li);
+    });
+  }
+
+  function renderCustomList() {
+    customList.replaceChildren();
+
+    const items = getShiftActivities().slice().sort((a, b) => {
+      if (a.type === "once" && b.type === "once") {
+        return a.date.localeCompare(b.date) || minutes(a.start) - minutes(b.start);
+      }
+      if (a.type === "once") return -1;
+      if (b.type === "once") return 1;
+      return minutes(a.start) - minutes(b.start);
+    });
+
+    if (!items.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty";
+      empty.textContent = "No saved activities for this shift yet.";
+      customList.appendChild(empty);
+      return;
+    }
+
+    items.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "custom-item";
+
+      const title = document.createElement("h3");
+      title.textContent = item.name;
+
+      const type = document.createElement("div");
+      type.className = "type-label";
+      type.textContent = formatType(item);
+
+      const time = document.createElement("p");
+      time.className = "small";
+      time.textContent = `${item.start}–${item.end}`;
+
+      card.append(title, type, time);
+
+      if (item.notes) {
+        const notes = document.createElement("p");
+        notes.className = "small";
+        notes.textContent = item.notes;
+        card.appendChild(notes);
+      }
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+      actions.appendChild(makeButton("Edit", "secondary",
+        () => editActivity(item.id)));
+      actions.appendChild(makeButton("Delete", "danger",
+        () => deleteActivity(item.id)));
+      card.appendChild(actions);
+
+      customList.appendChild(card);
+    });
+  }
+
+  function renderAll() {
+    renderPlan();
+    renderCustomList();
+  }
+
+  function updateTypeFields() {
+    const weekly = typeInput.value === "weekly";
+    $("once-fields").hidden = weekly;
+    $("weekly-fields").hidden = !weekly;
+    dateInput.required = !weekly;
+
+    document.querySelectorAll('input[name="weekday"]').forEach(input => {
+      input.required = false;
+    });
+  }
+
+  function getSelectedDays() {
+    return [...document.querySelectorAll('input[name="weekday"]:checked')]
+      .map(input => Number(input.value));
+  }
+
+  function setSelectedDays(days) {
+    document.querySelectorAll('input[name="weekday"]').forEach(input => {
+      input.checked = Array.isArray(days) && days.includes(Number(input.value));
+    });
+  }
+
+  function resetForm() {
+    editingId = null;
+    form.reset();
+    typeInput.value = "once";
+    dateInput.value = planDateInput.value || todayString();
+    startInput.value = "18:00";
+    endInput.value = "18:30";
+    untilInput.value = "";
+    setSelectedDays([]);
+    formTitle.textContent = "Add a custom activity";
+    saveButton.textContent = "+ Add activity";
+    cancelRow.hidden = true;
+    updateTypeFields();
+  }
+
+  function editActivity(id) {
+    const item = getShiftActivities().find(activity => activity.id === id);
+    if (!item) return;
+
+    editingId = id;
+    nameInput.value = item.name;
+    typeInput.value = item.type;
+    dateInput.value = item.date || planDateInput.value || todayString();
+    untilInput.value = item.until || "";
+    startInput.value = item.start;
+    endInput.value = item.end;
+    notesInput.value = item.notes || "";
+    setSelectedDays(item.days || []);
+
+    formTitle.textContent = "Edit your activity";
+    saveButton.textContent = "Save changes";
+    cancelRow.hidden = false;
+    updateTypeFields();
+
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+    nameInput.focus();
+  }
+
+  function deleteActivity(id) {
+    if (!confirm("Delete this activity permanently?")) return;
+
+    const oldActivities = activities;
+    activities = activities.filter(item => item.id !== id);
+
+    if (!saveActivities()) {
+      activities = oldActivities;
+      return;
+    }
+
+    if (editingId === id) resetForm();
+    renderAll();
+  }
+
+  typeInput.addEventListener("change", updateTypeFields);
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const name = nameInput.value.trim();
+    const type = typeInput.value;
+    const start = startInput.value;
+    const end = endInput.value;
+    const notes = notesInput.value.trim();
+    const selectedDays = getSelectedDays();
+
+    if (!name || !validTime(start) || !validTime(end)) {
+      alert("Please enter an activity name and valid start and end times.");
+      return;
+    }
+
+    if (minutes(end) <= minutes(start)) {
+      alert("End time must be later than start time. For overnight activities, create two entries.");
+      return;
+    }
+
+    if (type === "once" && !parseDate(dateInput.value)) {
+      alert("Please choose a valid date for this activity.");
+      return;
+    }
+
+    if (type === "weekly" && selectedDays.length === 0) {
+      alert("Please select at least one weekday for this recurring activity.");
+      return;
+    }
+
+    if (untilInput.value && !parseDate(untilInput.value)) {
+      alert("Please enter a valid repeat-until date.");
+      return;
+    }
+
+    if (type === "weekly" && untilInput.value &&
+        untilInput.value < todayString()) {
+      alert("The repeat-until date is in the past. Please choose a future date.");
+      return;
+    }
+
+    const oldActivities = activities;
+    const existing = editingId !== null
+      ? activities.find(item => item.id === editingId)
+      : null;
+
+    if (existing) {
+      activities = activities.map(item => item.id === editingId ? {
+        ...item,
+        shift: sel.value,
+        name,
+        type,
+        date: type === "once" ? dateInput.value : "",
+        days: type === "weekly" ? selectedDays : [],
+        until: type === "weekly" ? untilInput.value : "",
+        start,
+        end,
+        notes
+      } : item);
+    } else {
+      activities = [...activities, {
+        id: makeId(),
+        shift: sel.value,
+        name,
+        type,
+        date: type === "once" ? dateInput.value : "",
+        days: type === "weekly" ? selectedDays : [],
+        until: type === "weekly" ? untilInput.value : "",
+        start,
+        end,
+        notes
+      }];
+    }
+
+    if (!saveActivities()) {
+      activities = oldActivities;
+      return;
+    }
+
+    if (type === "once") planDateInput.value = dateInput.value;
+    else if (!isScheduled({ type, days: selectedDays, until: untilInput.value },
+      planDateInput.value)) {
+      // Keep the currently selected date visible; the recurring activity
+      // will appear whenever one of its selected weekdays is viewed.
+    }
+
+    resetForm();
+    renderAll();
+  });
+
+  $("cancel-edit").addEventListener("click", resetForm);
+
+  sel.addEventListener("change", () => {
+    try {
+      localStorage.setItem("shift", sel.value);
+    } catch (error) {
+      console.warn("Could not save selected shift.", error);
+    }
+    resetForm();
+    renderAll();
+  });
+
+  planDateInput.addEventListener("change", () => {
+    if (!parseDate(planDateInput.value)) {
+      planDateInput.value = todayString();
+    }
+    if (editingId === null) dateInput.value = planDateInput.value;
+    renderPlan();
+  });
+
+  $("previous-day").addEventListener("click", () => {
+    planDateInput.value = addDays(planDateInput.value || todayString(), -1);
+    renderPlan();
+  });
+
+  $("next-day").addEventListener("click", () => {
+    planDateInput.value = addDays(planDateInput.value || todayString(), 1);
+    renderPlan();
+  });
+
+  $("today-button").addEventListener("click", () => {
+    planDateInput.value = todayString();
+    if (editingId === null) dateInput.value = todayString();
+    renderPlan();
+  });
+
+  Object.keys(SCHEDULES).forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    sel.appendChild(option);
+  });
+
+  try {
+    const savedShift = localStorage.getItem("shift");
+    if (savedShift && SCHEDULES[savedShift]) sel.value = savedShift;
+  } catch (error) {
+    console.warn("Could not restore the selected shift.", error);
+  }
+
+  loadActivities();
+  planDateInput.value = todayString();
+  dateInput.value = todayString();
+  updateTypeFields();
+
+  function refresh() {
+    renderTodayDate();
+    renderDays();
+    renderAll();
+  }
+
+  refresh();
+  setInterval(refresh, 60000);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refresh();
+  });
+
+  // Preserve the existing service-worker update behavior.
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+      try {
+        const registration =
+          await navigator.serviceWorker.register("./sw.js");
+
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        }
+
+        registration.addEventListener("updatefound", () => {
+          const worker = registration.installing;
+          if (!worker) return;
+
+          worker.addEventListener("statechange", () => {
+            if (worker.state === "installed" &&
+                navigator.serviceWorker.controller) {
+              worker.postMessage({ type: "SKIP_WAITING" });
+            }
+          });
+        });
+
+        await registration.update();
+
+        document.addEventListener("visibilitychange", async () => {
+          if (!document.hidden) await registration.update();
+        });
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
+      } catch (error) {
+        console.error("Service worker update check failed:", error);
+      }
+    });
+  }
+</script>
+</body>
 </html>
+```
